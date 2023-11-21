@@ -5,6 +5,7 @@
 
 #define CTLSPC  CTL_T(KC_SPC)
 #define CTLENT  CTL_T(KC_ENT)
+#define EMDASH UC(0x2014)
 
 enum custom_keycodes {
     LANG_JA = SAFE_RANGE,
@@ -80,7 +81,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [4] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_GRV, KC_PSLS,    KC_7,    KC_8,    KC_9, XXXXXXX,                      KC_EXLM,   KC_AT, KC_HASH,  KC_DLR, KC_PERC, XXXXXXX,
+       KC_GRV, KC_PSLS,    KC_7,    KC_8,    KC_9,  EMDASH,                      KC_EXLM,   KC_AT, KC_HASH,  KC_DLR, KC_PERC, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       XXXXXXX, KC_PAST,    KC_4,    KC_5,    KC_6, KC_MINS,                      KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_BSLS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
