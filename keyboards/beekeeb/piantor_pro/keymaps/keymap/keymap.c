@@ -3,6 +3,76 @@
 
 #include QMK_KEYBOARD_H
 
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_HOLD
+} td_state_t;
+
+typedef struct {
+    bool is_press_action;
+    td_state_t state;
+} td_tap_t;
+
+enum {
+    NAV_MS,
+};
+
+td_state_t cur_dance(tap_dance_state_t *state);
+
+void ql_finished(tap_dance_state_t *state, void *user_data);
+void ql_reset(tap_dance_state_t *state, void *user_data);
+
+td_state_t cur_dance(tap_dance_state_t *state) {
+    if (state->count == 1 && state->pressed) return TD_SINGLE_HOLD;
+    else if (state->count == 2 && state->pressed) return TD_DOUBLE_HOLD;
+    else return TD_UNKNOWN;
+}
+
+static td_tap_t ql_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+void ql_finished(tap_dance_state_t *state, void *user_data) {
+    ql_tap_state.state = cur_dance(state);
+    switch (ql_tap_state.state) {
+        case TD_SINGLE_HOLD:
+            layer_on(2);
+            break;
+        case TD_DOUBLE_HOLD:
+            layer_on(3);
+            break;
+        default:
+            break;
+    }
+}
+
+void ql_reset(tap_dance_state_t *state, void *user_data) {
+    if (ql_tap_state.state == TD_SINGLE_HOLD) {
+        layer_off(2);
+    };
+    if (ql_tap_state.state == TD_DOUBLE_HOLD) {
+        layer_off(3);
+    };
+    ql_tap_state.state = TD_NONE;
+}
+
+tap_dance_action_t tap_dance_actions[] = {
+    [NAV_MS]  = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ql_finished, ql_reset)
+};
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
+            return 1000;
+        default:
+            return TAPPING_TERM;
+    }
+}
+
+
 #define CTLSPC  CTL_T(KC_SPC)
 #define CTLENT  CTL_T(KC_ENT)
 #define EMDASH UC(0x2014)
@@ -39,7 +109,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
        KC_ESC,    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,                         KC_K,    KC_H, KC_COMM,  KC_DOT, KC_SLSH, KC_RGUI,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(2), KC_LSFT,  CTLSPC,     CTLENT, KC_RSFT,   MO(4)
+                                       TD(NAV_MS), KC_LSFT,  CTLSPC,     CTLENT, KC_RSFT,   MO(4)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -51,7 +121,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
        KC_ESC,    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,                         KC_K,    KC_H, KC_COMM,  KC_DOT, KC_SLSH, KC_RGUI,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(2), KC_LSFT,  CTLSPC,     CTLENT, KC_RSFT,   MO(4)
+                                       TD(NAV_MS), KC_LSFT,  CTLSPC,     CTLENT, KC_RSFT,   MO(4)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -59,7 +129,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       XXXXXXX, KC_UNDO,  KC_CUT, KC_COPY, KC_PSTE, KC_PGUP,                      XXXXXXX, XXXXXXX,   KC_UP,  KC_F11,  KC_F12, KC_BSPC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_PSCR, KC_HOME,  KC_END, XXXXXXX,   MO(3), KC_PGDN,                      XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, KC_RALT,
+      KC_PSCR, KC_HOME,  KC_END, XXXXXXX, XXXXXXX, KC_PGDN,                      XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, KC_RALT,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       XXXXXXX,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10, KC_RGUI,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
