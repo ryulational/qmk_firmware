@@ -3,3 +3,5 @@
 
 #undef TAPPING_TERM
 #define TAPPING_TERM 250
+
+#define MOUSEKEY_MOVE_DELTA 6
